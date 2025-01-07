@@ -1,0 +1,27 @@
+name: puzzel_app
+description: "Een Flutter-app voor puzzelspellen"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  table_calendar: ^3.0.6
+  shared_preferences: ^2.0.15
+  firebase_core: ^3.9.0 # Zorg ervoor dat deze versie compatibel is
+  firebase_auth: ^5.3.4
+  cloud_firestore: ^5.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

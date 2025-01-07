@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">810065522962</string>
+    <string name="google_api_key" translatable="false">AIzaSyAW1Xd94j7RgYgtVrN_vSMzkJyyKw8Tlgk</string>
+    <string name="google_app_id" translatable="false">1:810065522962:android:7c5197f36c0f3915e583cb</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAW1Xd94j7RgYgtVrN_vSMzkJyyKw8Tlgk</string>
+    <string name="google_storage_bucket" translatable="false">puzzle-app-72bef.firebasestorage.app</string>
+    <string name="project_id" translatable="false">puzzle-app-72bef</string>
+</resources>

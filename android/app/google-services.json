@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "810065522962",
+    "project_id": "puzzle-app-72bef",
+    "storage_bucket": "puzzle-app-72bef.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810065522962:android:7c5197f36c0f3915e583cb",
+        "android_client_info": {
+          "package_name": "com.example.puzzel_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW1Xd94j7RgYgtVrN_vSMzkJyyKw8Tlgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810065522962:android:548018c8e214547ee583cb",
+        "android_client_info": {
+          "package_name": "com.example.puzzleapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW1Xd94j7RgYgtVrN_vSMzkJyyKw8Tlgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

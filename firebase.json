@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "puzzle-app-72bef",
+          "appId": "1:810065522962:android:548018c8e214547ee583cb",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "puzzle-app-72bef",
+          "configurations": {
+            "android": "1:810065522962:android:548018c8e214547ee583cb",
+            "ios": "1:810065522962:ios:5d47b6ae169292fde583cb",
+            "macos": "1:810065522962:ios:5d47b6ae169292fde583cb",
+            "web": "1:810065522962:web:97952eb2ab61ab8ce583cb",
+            "windows": "1:810065522962:web:48ad668d9b2fbca6e583cb"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
