@@ -3,19 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class SudokuService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Ophalen van Sudoku-data uit Firestore
+  /// Ophalen van Sudoku-data uit Firestore
+  /// Retourneert een Map<String, dynamic> of null (als de doc niet bestaat).
   Future<Map<String, dynamic>?> getSudoku(String userId, String puzzleId) async {
     try {
-      final doc = await _firestore
+      final docSnapshot = await _firestore
           .collection('users')
           .doc(userId)
           .collection('sudokus')
           .doc(puzzleId)
           .get();
 
-      if (doc.exists) {
-        print('DEBUG: Sudoku data gevonden voor $puzzleId: ${doc.data()}');
-        return doc.data();
+      if (docSnapshot.exists) {
+        print('DEBUG: Sudoku data gevonden voor $puzzleId: ${docSnapshot.data()}');
+        // Firestore .data() is Map<String, dynamic>? in Dart
+        return docSnapshot.data() as Map<String, dynamic>?;
       } else {
         print('DEBUG: Geen Sudoku data gevonden voor $puzzleId');
         return null;
@@ -26,7 +28,7 @@ class SudokuService {
     }
   }
 
-  // Opslaan van volledige Sudoku-data in Firestore
+  /// Opslaan van de gehele Sudoku (grid + solution + progress + hintsUsed).
   Future<void> saveSudoku({
     required String userId,
     required String puzzleId,
@@ -54,7 +56,7 @@ class SudokuService {
     }
   }
 
-  // Opslaan van voortgang in Firestore
+  /// Alleén de voortgang (progress en hintsUsed) updaten in een al bestaand doc.
   Future<void> saveSudokuProgress({
     required String userId,
     required String puzzleId,
@@ -78,7 +80,7 @@ class SudokuService {
     }
   }
 
-  // Hulpfunctie: 2D-array naar Map converteren
+  /// Hulpfunctie: 2D-array -> Map
   Map<String, int?> convert2DArrayToMap(List<List<int?>> array) {
     final Map<String, int?> map = {};
     for (int row = 0; row < array.length; row++) {
@@ -90,12 +92,15 @@ class SudokuService {
     return map;
   }
 
-  // Hulpfunctie: Map naar 2D-array converteren
+  /// Hulpfunctie: Map -> 2D-array
   List<List<int?>> convertMapTo2DArray(Map<String, int?> map, int rows, int cols) {
-    final List<List<int?>> array = List.generate(rows, (_) => List.filled(cols, null));
+    final List<List<int?>> array = List.generate(
+      rows,
+          (_) => List.filled(cols, null),
+    );
     map.forEach((key, value) {
-      final row = int.parse(key[0]); // Eerste cijfer is de rij
-      final col = int.parse(key[1]); // Tweede cijfer is de kolom
+      final row = int.parse(key[0]); // Bijv. "05" -> row=0
+      final col = int.parse(key[1]); // Bijv. "05" -> col=5
       array[row][col] = value;
     });
     print('DEBUG: Map geconverteerd naar 2D-array: $array');

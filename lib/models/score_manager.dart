@@ -1,4 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../models/sudoku_service.dart';
+
+
 
 class ScoreManager {
   static const String _totalScoreKey = 'total_score';
