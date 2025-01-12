@@ -45,3 +45,5 @@ class ScoreManager {
     prefs.remove('score_$puzzleId');
   }
 }
+
+
