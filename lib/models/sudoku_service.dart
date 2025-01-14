@@ -36,6 +36,7 @@ class SudokuService {
     required Map<String, int?> solution,
     required Map<String, int?> progress,
     required int hintsUsed,
+    String status = "inProgress", // Voeg een standaardstatus toe
   }) async {
     try {
       await _firestore
@@ -48,6 +49,7 @@ class SudokuService {
         'solution': solution,
         'progress': progress,
         'hintsUsed': hintsUsed,
+        'status': status, // Status wordt opgeslagen
         'timestamp': FieldValue.serverTimestamp(),
       });
       print('DEBUG: Sudoku succesvol opgeslagen voor $puzzleId');
@@ -55,6 +57,7 @@ class SudokuService {
       print('ERROR: Fout bij opslaan van Sudoku: $e');
     }
   }
+
 
   /// Alleén de voortgang (progress en hintsUsed) updaten in een al bestaand doc.
   Future<void> saveSudokuProgress({

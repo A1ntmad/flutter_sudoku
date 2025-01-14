@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'profile_screen.dart'; // Importeer het profielscherm
 import 'sudoku_list_screen.dart'; // Importeer het sudoku lijst scherm
+import 'wordsearch_list_screen.dart'; // Importeer het woordzoeker lijst scherm
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,14 +24,29 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SudokuListScreen()),
-            );
-          },
-          child: const Text('Speel Sudoku'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SudokuListScreen()),
+                );
+              },
+              child: const Text('Speel Sudoku'),
+            ),
+            const SizedBox(height: 20), // Voeg ruimte toe tussen de knoppen
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WordsearchListScreen()),
+                );
+              },
+              child: const Text('Speel Woordzoeker'),
+            ),
+          ],
         ),
       ),
     );

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../managers/sudoku_manager.dart';
 
 class SudokuScreen extends StatefulWidget {
-  final DateTime date;                // De datum van deze sudoku
+  final DateTime date; // De datum van deze sudoku
   final Function(double) onProgressUpdate;
 
   const SudokuScreen({
@@ -19,106 +19,200 @@ class SudokuScreen extends StatefulWidget {
 class _SudokuScreenState extends State<SudokuScreen> {
   final SudokuManager _manager = SudokuManager();
   bool _screenLoading = true; // Zolang dit true is, tonen we een laad-indicator
+  int? _selectedNumber; // Het geselecteerde nummer voor invoer
 
   @override
   void initState() {
     super.initState();
+    print("DEBUG: SudokuScreen geopend voor datum ${widget.date}");
     _initializeManager();
   }
 
-  /// Stap 1: Manager initialiseren (laden puzzle, user checken, etc.)
+  /// Manager initialiseren (laden puzzle, user checken, etc.)
   Future<void> _initializeManager() async {
     try {
-      // init(...) laadt of genereert de puzzle. Kan eventjes duren.
+      print("DEBUG: Initialisatie van SudokuManager gestart voor datum: ${widget.date}");
       await _manager.init(widget.date, widget.onProgressUpdate);
+      print("DEBUG: SudokuManager succesvol geïnitialiseerd");
       setState(() {
         _screenLoading = false;
       });
     } catch (e) {
-      // Als er iets misgaat (bv. geen user ingelogd), ga terug of toon fout
-      print('Fout bij _initializeManager: $e');
+      print('ERROR: Fout bij _initializeManager: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fout bij laden van de puzzel: $e')),
+      );
       Navigator.pop(context);
+    }
+  }
+
+  /// Voortgang opslaan
+  Future<void> _saveProgress() async {
+    try {
+      await _manager.saveProgress();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Voortgang opgeslagen!')),
+      );
+      print("DEBUG: Voortgang opgeslagen en status bijgewerkt naar 'inProgress'.");
+    } catch (e) {
+      print("ERROR: Fout bij opslaan van voortgang: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fout bij opslaan van voortgang: $e')),
+      );
     }
   }
 
   /// Hint-knop
   Future<void> _onHintPressed() async {
-    await _manager.showHint();
-    // manager verwerkt een hint (bvb. vul eerste lege cel in en verlaag score).
-    setState(() {});
+    try {
+      await _manager.showHint();
+      setState(() {}); // Scherm opnieuw tekenen
+    } catch (e) {
+      print("ERROR: Fout bij het tonen van een hint: $e");
+    }
   }
 
   /// Oplossing-knop
   Future<void> _onSolutionPressed() async {
-    await _manager.showSolution();
-    // manager vult de hele puzzle in (score naar 0).
-    setState(() {});
+    try {
+      await _manager.showSolution(); // Zorg dat deze methode in je SudokuManager bestaat
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Oplossing getoond!')),
+      );
+      print("DEBUG: Oplossing getoond.");
+    } catch (e) {
+      print("ERROR: Fout bij tonen van oplossing: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fout bij tonen van oplossing: $e')),
+      );
+    }
   }
 
   /// Controle-knop
-  void _onCheckPressed() {
+  void _onCheckPressed() async {
     final correct = _manager.checkPuzzle();
-    // Toon melding via Snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(correct ? 'Correct opgelost!' : 'Fouten gevonden!'),
+
+    if (correct) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Gefeliciteerd!'),
+          content: const Text(
+              'De puzzel is correct opgelost. Wil je deze inleveren?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Nee'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _manager.saveFullSudoku(status: "completed");
+                Navigator.pop(ctx, true);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Puzzel is succesvol ingeleverd!')),
+                );
+                Navigator.pop(context, true);
+              },
+              child: const Text('Ja, inleveren'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        print("DEBUG: Sudoku voltooid en opgeslagen.");
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fouten gevonden! Probeer opnieuw.')),
+      );
+    }
+  }
+
+  /// Selecteer een cel
+  void _onCellTap(int row, int col) {
+    setState(() {
+      _manager.selectCell(row, col);
+    });
+  }
+
+  /// Wis de inhoud van de geselecteerde cel
+  void _onClearPressed() {
+    if (_manager.selectedRow != null && _manager.selectedCol != null) {
+      _manager.clearSelectedCell();
+      setState(() {}); // Scherm opnieuw tekenen
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecteer eerst een cel om te wissen.')),
+      );
+    }
+  }
+
+  /// Bouw de nummerkiezer inclusief de wis-knop
+  Widget _buildNumberPicker() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // Positioneer de knoppen in het midden
+        children: [
+          ...List.generate(9, (index) {
+            final number = index + 1;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0), // Ruimte tussen de knoppen
+              child: GestureDetector(
+                onTap: () {
+                  if (_manager.selectedRow != null && _manager.selectedCol != null) {
+                    setState(() {
+                      _selectedNumber = number;
+                      _manager.setNumber(
+                        _manager.selectedRow!,
+                        _manager.selectedCol!,
+                        number,
+                      );
+                    });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Selecteer eerst een cel.')),
+                    );
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 18, // Kleinere grootte van de knop
+                  backgroundColor: _selectedNumber == number ? Colors.blue : Colors.grey[300],
+                  child: Text(
+                    number.toString(),
+                    style: TextStyle(
+                      fontSize: 16, // Kleinere lettergrootte
+                      color: _selectedNumber == number ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: GestureDetector(
+              onTap: _onClearPressed,
+              child: CircleAvatar(
+                radius: 18, // Zelfde grootte als de andere knoppen
+                backgroundColor: Colors.red[300],
+                child: const Icon(
+                  Icons.clear,
+                  size: 16, // Kleinere X-knop
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Klik op een cel: dialoog om cijfer te kiezen
-  void _onCellTap(int row, int col) async {
-    // Check of deze cel bewerkbaar is (in manager: puzzle[row][col] == null)
-    if (_manager.puzzle[row][col] != null) {
-      // Niet bewerkbaar (was al ingevuld in puzzle)
-      return;
-    }
-
-    // Dialoog om 1-9 te kiezen
-    final chosenNum = await _showNumberPicker();
-    if (chosenNum != null) {
-      setState(() {
-        _manager.setNumber(row, col, chosenNum);
-      });
-    }
-  }
-
-  /// Dialoog: kies cijfer 1..9
-  Future<int?> _showNumberPicker() async {
-    return showDialog<int>(
-      context: context,
-      builder: (dialogCtx) {
-        return AlertDialog(
-          title: const Text('Kies een nummer'),
-          content: SizedBox(
-            width: 200,
-            height: 200,
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: 9,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisExtent: 60,  // hoogte van elke knop
-              ),
-              itemBuilder: (context, index) {
-                final number = index + 1; // 1..9
-                return ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(dialogCtx, number);
-                  },
-                  child: Text(number.toString()),
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    // Zolang manager of screenLoading = true is, tonen we laad-UI
     if (_screenLoading || _manager.isLoading) {
       return Scaffold(
         appBar: AppBar(
@@ -128,10 +222,8 @@ class _SudokuScreenState extends State<SudokuScreen> {
       );
     }
 
-    // Haal de puzzle-lijst (9x9) op uit de manager
     final puzzle = _manager.puzzle;
 
-    // WillPopScope: als we terugnavigeren, checken we of er wijzigingen zijn
     return WillPopScope(
       onWillPop: () async {
         if (_manager.hasChanges) {
@@ -148,8 +240,9 @@ class _SudokuScreenState extends State<SudokuScreen> {
                   ),
                   TextButton(
                     onPressed: () async {
-                      await _manager.saveProgress();
-                      Navigator.pop(ctx, true);
+                      await _saveProgress();
+                      Navigator.pop(ctx, true); // Sluit dialoog met true
+                      Navigator.pop(context, true); // Terug naar lijst met true
                     },
                     child: const Text('Ja, opslaan'),
                   ),
@@ -157,31 +250,69 @@ class _SudokuScreenState extends State<SudokuScreen> {
               );
             },
           );
-          // Als user “Ja” klikt => manager.saveProgress() => Navigator.pop(..., true)
           return shouldSave ?? false;
-          // Als null (dialoog weggeklikt) of false => blijf
         }
-        // geen changes => direct weg
-        return true;
+        Navigator.pop(context, false); // Geen wijzigingen, ga terug met false
+        return false;
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Sudoku van ${widget.date.toLocal().toString().split(' ')[0]}'),
+          title: const Text('Ga terug'),
+          actions: [
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    'Score: ${_manager.currentScore}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: 'Alles wissen',
+                  onPressed: () {
+                    _manager.clearSudoku();
+                    setState(() {});
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Alle cellen zijn gewist!')),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  tooltip: 'Hint gebruiken',
+                  onPressed: _onHintPressed,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.visibility), // 'Oplossing' knop
+                  tooltip: 'Oplossing tonen',
+                  onPressed: _onSolutionPressed,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.check),
+                  tooltip: 'Controleer puzzel',
+                  onPressed: _onCheckPressed,
+                ),
+              ],
+            ),
+          ],
         ),
         body: Column(
           children: [
             const SizedBox(height: 16),
-            // Toon de score in UI
             Text(
               'Sudoku Scoring: ${_manager.currentScore}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-
-            // Ons 9x9-raster
             Expanded(
               child: AspectRatio(
-                aspectRatio: 1, // Vierkant
+                aspectRatio: 1,
                 child: GridView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -192,17 +323,23 @@ class _SudokuScreenState extends State<SudokuScreen> {
                     final row = index ~/ 9;
                     final col = index % 9;
                     final cellKey = '$row$col';
-
-                    // Is de user something in progress of puzzle
                     final cellValue = _manager.progress[cellKey] ?? puzzle[row][col];
                     final isEditable = puzzle[row][col] == null;
 
                     return GestureDetector(
-                      onTap: () => isEditable ? _onCellTap(row, col) : null,
+                      onTap: () {
+                        if (isEditable) {
+                          setState(() {
+                            _manager.selectCell(row, col);
+                          });
+                        }
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
-                          color: isEditable ? Colors.lightBlue[100] : Colors.grey[200],
+                          color: _manager.selectedRow == row && _manager.selectedCol == col
+                              ? Colors.yellow[200] // Highlight geselecteerde cel
+                              : (isEditable ? Colors.lightBlue[100] : Colors.grey[200]),
                         ),
                         child: Center(
                           child: Text(
@@ -219,27 +356,8 @@ class _SudokuScreenState extends State<SudokuScreen> {
                 ),
               ),
             ),
-
-            // Drie knoppen: Hint, Oplossing, Controle
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _onHintPressed,
-                  child: const Text('Hint'),
-                ),
-                ElevatedButton(
-                  onPressed: _onSolutionPressed,
-                  child: const Text('Oplossing'),
-                ),
-                ElevatedButton(
-                  onPressed: _onCheckPressed,
-                  child: const Text('Controle'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+            _buildNumberPicker(), // Nummerkiezer en wis-knop
           ],
         ),
       ),

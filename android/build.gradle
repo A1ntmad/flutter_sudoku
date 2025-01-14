@@ -4,8 +4,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.1'
-        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.android.tools.build:gradle:8.2.1' // Zorg ervoor dat deze correct is
+        classpath 'com.google.gms:google-services:4.3.15' // Voor Firebase
     }
 }
 
