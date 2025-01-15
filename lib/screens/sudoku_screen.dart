@@ -151,61 +151,64 @@ class _SudokuScreenState extends State<SudokuScreen> {
 
   /// Bouw de nummerkiezer inclusief de wis-knop
   Widget _buildNumberPicker() {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Positioneer de knoppen in het midden
-        children: [
-          ...List.generate(9, (index) {
-            final number = index + 1;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0), // Ruimte tussen de knoppen
-              child: GestureDetector(
-                onTap: () {
-                  if (_manager.selectedRow != null && _manager.selectedCol != null) {
-                    setState(() {
-                      _selectedNumber = number;
-                      _manager.setNumber(
-                        _manager.selectedRow!,
-                        _manager.selectedCol!,
-                        number,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0), // Voeg ruimte onder de knoppen toe
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ...List.generate(9, (index) {
+              final number = index + 1;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: GestureDetector(
+                  onTap: () {
+                    if (_manager.selectedRow != null && _manager.selectedCol != null) {
+                      setState(() {
+                        _selectedNumber = number;
+                        _manager.setNumber(
+                          _manager.selectedRow!,
+                          _manager.selectedCol!,
+                          number,
+                        );
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Selecteer eerst een cel.')),
                       );
-                    });
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Selecteer eerst een cel.')),
-                    );
-                  }
-                },
-                child: CircleAvatar(
-                  radius: 18, // Kleinere grootte van de knop
-                  backgroundColor: _selectedNumber == number ? Colors.blue : Colors.grey[300],
-                  child: Text(
-                    number.toString(),
-                    style: TextStyle(
-                      fontSize: 16, // Kleinere lettergrootte
-                      color: _selectedNumber == number ? Colors.white : Colors.black,
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundColor: _selectedNumber == number ? Colors.blue : Colors.grey[300],
+                    child: Text(
+                      number.toString(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: _selectedNumber == number ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: GestureDetector(
-              onTap: _onClearPressed,
-              child: CircleAvatar(
-                radius: 18, // Zelfde grootte als de andere knoppen
-                backgroundColor: Colors.red[300],
-                child: const Icon(
-                  Icons.clear,
-                  size: 16, // Kleinere X-knop
-                  color: Colors.white,
+              );
+            }),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: GestureDetector(
+                onTap: _onClearPressed,
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.red[300],
+                  child: const Icon(
+                    Icons.clear,
+                    size: 20,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -257,7 +260,6 @@ class _SudokuScreenState extends State<SudokuScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Ga terug'),
           actions: [
             Row(
               children: [
@@ -304,11 +306,6 @@ class _SudokuScreenState extends State<SudokuScreen> {
         ),
         body: Column(
           children: [
-            const SizedBox(height: 16),
-            Text(
-              'Sudoku Scoring: ${_manager.currentScore}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
             const SizedBox(height: 16),
             Expanded(
               child: AspectRatio(

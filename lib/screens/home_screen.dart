@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'profile_screen.dart'; // Importeer het profielscherm
 import 'sudoku_list_screen.dart'; // Importeer het sudoku lijst scherm
 import 'wordsearch_list_screen.dart'; // Importeer het woordzoeker lijst scherm
+import 'binair_list_screen.dart'; // Importeer het binaire lijst scherm
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -45,6 +46,16 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text('Speel Woordzoeker'),
+            ),
+            const SizedBox(height: 20), // Voeg ruimte toe tussen de knoppen
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BinairListScreen()),
+                );
+              },
+              child: const Text('Speel Binair'),
             ),
           ],
         ),
